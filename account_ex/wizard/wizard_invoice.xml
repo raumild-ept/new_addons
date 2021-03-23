@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="view_draft_invoices_wizard_form">
+        <field name="name">draft.invoices.form</field>
+        <field name="model">wizard.account.move</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="partner_id"/>
+                        <field name="draft_invoices_ids" tree_view_ref="account_ex.view_partner_draft_invoices_tree"/>
+                    </group>
+                    <footer>
+                        <button name="validate_invoices" string="Validate" type="object"/>
+                        <button special="cancel" string="close" type="object"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_partner_draft_invoices_tree">
+        <field name="name">draft.invoices.list</field>
+        <field name="model">wizard.draft.invoice</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="validate_invoice"/>
+                <field name="draft_invoice_id"/>
+            </tree>
+        </field>
+    </record>
+</odoo>
