@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+partner_lead_user,partner_lead_partner_lead_user,model_partner_lead,group_partner_lead_user,1,1,1,1
+partner_lead_admin,partner_lead_partner_lead_admin,model_partner_lead,group_partner_lead_admin,0,0,0,0
+salesperson_user,partner_lead_salesperson_user,model_salesperson_count,group_partner_lead_user,1,1,1,1
+salesperson_admin,partner_lead_salesperson_admin,model_salesperson_count,group_partner_lead_admin,0,0,0,0
+

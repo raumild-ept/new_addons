@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="view_partner_lead_tree">
+        <field name="name">partner.lead.tree</field>
+        <field name="model">partner.lead</field>
+        <field name="arch" type="xml">
+            <tree string="Partner Lead">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="to_date"/>
+                <field name="from_date"/>
+                <field name="total_revenue" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_partner_lead_form" model="ir.ui.view">
+        <field name="name">partner.lead.form</field>
+        <field name="model">partner.lead</field>
+        <field name="arch" type="xml">
+            <form string="Partner Lead">
+                <header>
+                    <button name="get_pipeline_details" string="Get Pipeline Details" type="object"/>
+                </header>
+                <sheet>
+                    <h2>
+                        <field name='name'/>
+                    </h2>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="partner_contacts_ids"
+                                   widget="many2many_tags_avatar"
+                                    />
+                            <field name="total_revenue"/>
+                        </group>
+                        <group>
+                            <field name="from_date"/>
+                            <field name="to_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Salespersons">
+                            <field name="salesperson_lead_count_ids"
+                                   tree_view_ref="partner_lead.view_salesperson_tree"/>
+                        </page>
+                        <page string="Leads">
+                            <field name="lead_ids"/>
+                        </page>
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_partner_lead">
+        <field name="name">Partners and Leads</field>
+        <field name="res_model">partner.lead</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="root_partner_lead" name="Partner Lead"/>
+    <menuitem id="menu_partner_id" parent="root_partner_lead"
+              name="Here" action="partner_lead.action_partner_lead"/>
+
+</odoo>

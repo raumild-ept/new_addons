@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.module.category" id="partner_lead_category">
+        <field name="name">Partner Lead</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="group_partner_lead_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="partner_lead.partner_lead_category"/>
+    </record>
+
+    <record id="group_partner_lead_admin" model="res.groups">
+        <field name="name">Admin</field>
+        <field name="category_id" ref="partner_lead.partner_lead_category"/>
+        <field name="implied_ids" eval="[(4, ref('group_partner_lead_user'))]"/>
+    </record>
+
+    <record model="ir.rule" id="ir_rule_for_partner_lead_user">
+        <field name="name">rule.user</field>
+        <field name="model_id" ref="model_salesperson_count"/>
+        <field name="groups" eval="[(4,ref('group_partner_lead_user'))]"/>
+        <field name="domain_force">[('name', '=', user.id)]</field>
+    </record>
+
+    <record model="ir.rule" id="ir_rule_for_partner_lead_admin">
+        <field name="name">rule.user</field>
+        <field name="model_id" ref="model_salesperson_count"/>
+        <field name="groups" eval="[(4,ref('group_partner_lead_admin'))]"/>
+    </record>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_salesperson_tree" model="ir.ui.view">
+        <field name="name">salesperson.tree</field>
+        <field name="model">salesperson.count</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="pipelines"/>
+                <field name="revenue"/>
+                <field name="quotations"/>
+                <field name="sale_orders"/>
+                <field name="sale_amount"/>
+                <field name="success_ratio"/>
+            </tree>
+        </field>
+    </record>
+</odoo>
