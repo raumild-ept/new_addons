@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem id="menu_sales_commission"
+              parent="sale.sale_menu_root"
+              name="Commission"/>
+
+    <menuitem id="menu_sales_commission_worksheet"
+              parent="menu_sales_commission"
+              name="Worksheet"
+              action="action_sales_commission_ept"/>
+
+    <menuitem id="menu_sales_commission_lines"
+              parent="menu_sales_commission"
+              name="Commission Lines"
+              action="action_sales_commission_lines"/>
+</odoo>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">sales.commission.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="Commission Configuration" string="Commission Configuration"
+                     data-key="sales_commission_ept" groups="sales_commission_ept.group_sales_commission_ept_commission_user">
+                    <div groups="sales_commission_ept.group_sales_commission_ept_sales_manager">
+                    <h2>Commission Calculation Method</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box" id="confirmation_email_setting">
+                            <div class="o_setting_right_pane">
+                                <div class="row mt16">
+                                    <label for="default_salesperson_commission_calculation" string="Commission Calculate"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="default_salesperson_commission_calculation" widget="upgrade_radio" class="oe_inline"/>
+                                </div>
+                                <div class="text-muted">
+                                    Select based on what commissions will be calculated.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" id="confirmation_email_setting">
+                            <div class="o_setting_right_pane">
+                                <div class="row mt16">
+                                    <label for="default_manager_commission_calculation" string="Manager Commission Method"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="default_manager_commission_calculation" widget="upgrade_radio" class="oe_inline"/>
+                                </div>
+                                <div class="text-muted">
+                                    Set method how manager's commission will be calculated.
+                                </div>
+                            </div>
+                        </div></div></div>
+                    <div groups="sales_commission_ept.group_sales_commission_ept_sales_manager">
+                    <h2>Set Commission Percentage</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box" id="confirmation_email_setting">
+                            <div class="o_setting_right_pane">
+                                <div class="row mt16">
+                                    <label for="commission_percentage" string="Commission Percentage"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="commission_percentage" widget="percentage" />
+                                </div>
+                                <div class="text-muted">
+                                    Set Commission Percentage
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" id="confirmation_email_setting">
+                            <div class="o_setting_right_pane">
+                                <div class="row mt16">
+                                    <label for="team_commission_percentage" string="Team's Commission Percentage"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="team_commission_percentage" widget="percentage"/>
+                                </div>
+                                <div class="text-muted">
+                                    Set Sales team's commission percentage.
+                                </div>
+                            </div>
+                        </div></div></div>
+                    <h2>Configure Commission Product</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <div class="col-12 col-lg-6 o_setting_box" id="confirmation_email_setting">
+                            <div class="o_setting_right_pane">
+                                <div class="row mt16">
+                                    <label for="default_product_id" string="Commission Product"
+                                           class="col-lg-4 o_light_label"/>
+                                    <field name="default_product_id" class="oe_inline"/>
+                                </div>
+                                <div class="text-muted">
+                                    Set Commission Product.
+                                </div>
+                            </div>
+                        </div></div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_sales_commission_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="res_config_settings_view_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'sales_commission_ept'}</field>
+    </record>
+
+    <menuitem id="menu_sale_general_settings"
+              name="Commission Configuration"
+              parent="sale.menu_sale_config"
+              sequence="0"
+              action="action_sales_commission_config_settings"
+              groups="base.group_system"/>
+</odoo>

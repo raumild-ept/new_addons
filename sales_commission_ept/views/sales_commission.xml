@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sales_commission_ept_kanban" model="ir.ui.view">
+        <field name="name">sales.commission.ept.kanban</field>
+        <field name="model">sales.commission.ept</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="name"/>
+                <field name="from_date"/>
+                <field name="to_date"/>
+                <field name="status"/>
+                <field name="user_id"/>
+                <field name="total_commission"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_res_partner_kanban">
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title oe_partner_heading">
+                                    <h2><field name="name"/></h2>
+                                    <br/>
+                                    <strong>From: </strong>
+                                    <field name="from_date"/>
+                                    <br/>
+                                    <strong>To: </strong>
+                                    <field name="to_date"/>
+                                    <br/>
+                                    <strong>State: </strong>
+                                    <field name="status"/>
+                                    <br/>
+                                    <strong>Salesperson: </strong>
+                                    <field name="user_id"/>
+                                    <br/>
+                                    <strong>Total Commission: </strong>
+                                    <field name="total_commission"/>
+                                </strong>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_sales_commission_ept_form" model="ir.ui.view">
+        <field name="name">sales.commission.ept.form</field>
+        <field name="model">sales.commission.ept</field>
+        <field name="arch" type="xml">
+            <form string="Sales Commission">
+                <header>
+                    <button name="set_to_draft" string="Set To Draft" type="object"
+                            groups="sales_team.group_sale_manager"
+                            attrs="{'invisible':[('status','=','Draft')]}"/>
+                    <button name="calculate_commission" string="Calculate Commissions" type="object"/>
+                    <button name="paid_commission" string="Paid Commissions"
+                            type="object" attrs="{'invisible':[('status','=','Paid')]}"/>
+                    <field name="status" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="product_id"/>
+                            <field name="total_commission"/>
+                        </group>
+                        <group>
+                            <field name="from_date"/>
+                            <field name="to_date"/>
+                            <field name="paid_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Commission Lines" name="commission_lines">
+                            <field name="commission_lines_ids"
+                                   context="{'tree_view_ref':'sales_commission_ept.view_sales_commission_ept_o2m_tree'}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sales_commission_ept_tree" model="ir.ui.view">
+        <field name="name">sales.commission.ept.tree</field>
+        <field name="model">sales.commission.ept</field>
+        <field name="arch" type="xml">
+            <tree string="Sales Commission">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="product_id"/>
+                <field name="paid_date"/>
+                <field name="total_commission"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_sales_commission_ept_search" model="ir.ui.view">
+        <field name="name">sales.commission.ept.search</field>
+        <field name="model">sales.commission.ept</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter string="Current Month Commission" name="current_month"
+                        domain="[('create_date', '&lt;', (context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('create_date','>=',time.strftime('%%Y-%%m-01'))]"
+                        context="{}"/>
+                <filter string="Last Month Commission" name="prev_month"
+                        domain="[('create_date', '&gt;=', (context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01')),('create_date', '&lt;', time.strftime('%%Y-%%m-01'))]"
+                        context="{}"/>
+                <filter string="Today Commission" name="today_filter"
+                        domain="[('create_date', '=', context_today().strftime('%Y-%m-%d'))]" context="{}"/>
+                <filter string="Current Year Commission" name="current_year"
+                        domain="[('create_date', '&lt;=', time.strftime('%%Y-12-31')),('create_date', '&gt;=', time.strftime('%%Y-01-01'))]"
+                        context="{}"/>
+                <filter string="Paid Commission" name="paid_commission_filter" domain="[('status', '=' ,'Paid')]"
+                        context="{}"/>
+                <filter string="Last 15 days Commision" name="last_15_days_commission_filter"
+                        domain="[('create_date', '&gt;=', (context_today()-relativedelta(days=15)).strftime('%%Y-%%m-01')),('create_date', '&lt;', time.strftime('%%Y-%%m-01'))]"
+                        context="{}"/>
+                <group expand="1" string="Group By">
+                    <filter string="Salesperson" name="group_by_user_id" domain="[]"
+                            context="{'group_by':'user_id'}"/>
+                    <filter string="Stage" name="group_by_status" domain="[]"
+                            context="{'group_by':'status'}"/>
+                    <filter string="Product" name="group_by_product_id" domain="[]"
+                            context="{'group_by':'product_id'}"/>
+                    <filter string="Date Created" name="group_by_create_date" domain="[]"
+                            context="{'group_by':'create_date'}"/>
+                    <filter string="Year Created" name="group_by_create_date" domain="[]"
+                            context="{'group_by':'create_date:year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sales_commission_ept" model="ir.actions.act_window">
+        <field name="name">Sales Commissions</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sales.commission.ept</field>
+        <field name="view_mode">tree,form,kanban,search</field>
+        <field name="context">{'search_default_group_by_user_id': 1,
+                               'search_default_group_by_status': 1}</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                No worksheet records!! Create new.
+            </p>
+        </field>
+    </record>
+</odoo>

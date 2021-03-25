@@ -21,8 +21,8 @@ class Salesperson(models.Model):
         for record in self:
             pipelines = record.partner_id.lead_ids.filtered(lambda x: x.user_id == record.name)
             record.pipelines = len(pipelines)
-            record.revenue = sum(list(map(lambda x: x.expected_revenue, pipelines)))
-            record.quotations = sum(list(map(lambda x: x.quotation_count, pipelines)))
-            record.sale_orders = sum(list(map(lambda x: x.sale_order_count, pipelines)))
-            record.sale_amount = sum(list(map(lambda x: x.sale_amount_total, pipelines)))
+            record.revenue = sum(map(lambda x: x.expected_revenue, pipelines))
+            record.quotations = sum(map(lambda x: x.quotation_count, pipelines))
+            record.sale_orders = sum(map(lambda x: x.sale_order_count, pipelines))
+            record.sale_amount = sum(map(lambda x: x.sale_amount_total, pipelines))
             record.success_ratio = record.sale_amount * 100 / record.revenue if record.revenue is not 0 else 100

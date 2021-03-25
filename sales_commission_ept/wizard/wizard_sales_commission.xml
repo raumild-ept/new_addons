@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="wizard_sales_commission_form" model="ir.ui.view">
+        <field name="name">sale.commission.wizard</field>
+        <field name="model">wizard.sales.commission</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="reason"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="post_reason" string="Change" type="object"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
