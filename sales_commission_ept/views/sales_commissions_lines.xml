@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_sales_commission_ept_tree" model="ir.ui.view">
+    <record id="view_sales_commission_line_tree" model="ir.ui.view">
         <field name="name">sales.commission.ept.tree</field>
         <field name="model">sales.commission.line</field>
         <field name="arch" type="xml">
-            <tree string="Sales Commission" decoration-success="status == 'Paid'">
+            <tree decoration-success="status == 'Paid'">
                 <field name="commission_date"/>
                 <field name="source_document"/>
                 <field name="amount" sum="Total Amount"/>
@@ -19,7 +19,7 @@
         <field name="name">sales.commission.ept.o2m.tree</field>
         <field name="model">sales.commission.line</field>
         <field name="arch" type="xml">
-            <tree string="Sales Commission" editable="bottom" decoration-success="status == 'Paid'">
+            <tree editable="bottom" decoration-success="status == 'Paid'">
                 <field name="commission_date"/>
                 <field name="partner_id" widget="many2many_tags_avatar"/>
                 <field name="user_id"/>
@@ -48,7 +48,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">sales.commission.line</field>
         <field name="view_mode">tree,search</field>
-        <field name="view_id" ref="view_sales_commission_ept_tree"/>
+        <field name="view_id" ref="view_sales_commission_line_tree"/>
         <field name="context">{'search_default_group_by_user_id':1}</field>
         <field name="help" type="html">
             <p class="oe_view_nocontent_create">

@@ -15,6 +15,9 @@ class ModelName(models.TransientModel):
 
     def post_reason(self):
         """
+        ---------------
+        -WIZARD BUTTON-
+        ---------------
         When 'Change' button is clicked on this wizards form, this method is called.
         This method will notify users by posting message on 'sales.commission.ept' model.
         Than it will change state of commission to 'Draft' and it will change state of its

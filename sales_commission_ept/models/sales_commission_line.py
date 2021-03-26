@@ -20,11 +20,11 @@ class SalesCommissionLine(models.Model):
                                   help='Customer Name.')
     commission_date = fields.Date(string='Date Of Commission',
                                   help='Date of source document.')
-    source_document = fields.Char(string='Source Document',
+    source_document = fields.Char(string='Commission Source Doc',
                                   help='Name of document. Documents '
                                        'can be sale orders or invoices.')
     amount = fields.Float(string='Commission Amount', readonly=True,
-                          digits=(6, 2), help='Salepersons Commission Amount.')
+                          digits=(6, 2), help="Salesperson's Commission Amount.")
     status = fields.Selection(selection=[('Draft', 'Draft'),
                                          ('Paid', 'Paid')],
                               compute='_compute_commission_state',
@@ -35,6 +35,9 @@ class SalesCommissionLine(models.Model):
 
     def _compute_commission_state(self):
         """
+        ---------------
+        -COMPUTE STATE-
+        ---------------
         Compute method to set the status of commission line
         based on paid_amount's boolean value.
         :return:

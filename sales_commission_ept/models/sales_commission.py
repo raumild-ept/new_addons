@@ -17,17 +17,18 @@ class SalesCommission(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Sales Commission EPT'
 
-    name = fields.Char(default='COM/#####/GET', readonly=True,
+    name = fields.Char(default='COMM/#####/20##', readonly=True,
                        help='Commission name')
     user_id = fields.Many2one(comodel_name='res.users',
                               help='Salesperson or Salesmanager',
                               string='Salesperson',
                               default=lambda self: self.env.user)
     from_date = fields.Date(string='Commissions From',
+                            required='True',
                             help='Select starting date.')
     to_date = fields.Date(string='Commissions To', required=True,
                           help='Select ending date.')
-    paid_date = fields.Date(string='Commission Paid Date',
+    paid_date = fields.Date(string='Commission Paid Date', readonly=True,
                             help='Date on which all commissions are paid.')
     total_commission = fields.Float(string='Commission Total', digits=(6, 2),
                                     compute='_compute_total_commission',
@@ -59,54 +60,54 @@ class SalesCommission(models.Model):
         help='Mode of commission calculation of salesperson manager.',
         store=False)
 
-    @api.model
-    def create(self, vals_list):
+    @api.constrains('from_date', 'to_date')
+    def date_constrains(self):
+
         """
-        Create method is inherited to check validation of to be added commission master.
-        If dates conflict with records already present in commission master records
-        than it will raise error and won't create it.
+        ----------------
+        -DATE CONSTRAINS-
+        ----------------
+        Constrain to check validation of date range. If conflict occurs in any of
+        the records than this method won't allow to create record.
 
         If any record of selected salesperson is present in database in given time
         set (from_date and to_date), than it wont allow to create commission master.
+        :return:
+        """
+        if self.from_date > self.to_date:
+            raise ValidationError(_('From date is higher than To Date.'))
+        user_records = self.search([('user_id', '=', self.user_id.id), ('id', '!=', self.id)])
+        # If from_date and to_date creates conflict with existing records than it will raise error.
+        if user_records.filtered(
+                lambda rec:
+                self.from_date >= rec.from_date and
+                self.from_date <= rec.to_date or
+                self.to_date >= rec.from_date and
+                self.to_date <= rec.to_date or
+                self.from_date <= rec.from_date and
+                self.to_date >= rec.to_date):
+            raise ValidationError(_("The dates you are setting are conflicting "
+                                    "with existing records of the Salesperson "
+                                    "you have set. Enter the set of dates for "
+                                    "which commission."))
 
+    @api.model
+    def create(self, vals_list):
+        """
         Create method's 'vals_list' dict is altered and custom name is added to it.
 
         :param vals_list: It is dictionary of values inserted in form.
         :return:
         """
-        user_records = self.search([('user_id', '=', vals_list['user_id'])])
-
-        # If from_date and to_date creates conflict with existing records than it will raise error.
-        if vals_list['from_date'] and user_records.filtered(
-                lambda rec: vals_list['from_date'] >= str(rec.from_date) and
-                            vals_list['from_date'] <= str(rec.to_date) or
-                            vals_list['to_date'] >= str(rec.from_date) and
-                            vals_list['to_date'] <= str(rec.to_date) or
-                            vals_list['from_date'] <= str(rec.from_date) and
-                            vals_list['to_date'] >= str(rec.to_date)):
-            raise ValidationError(_(
-                """The dates you are setting are conflicting with existing records of
-                 the Salesperson you have set. Enter the set of dates for which commission
-                 records won't get duplicated.                 
-                 Suggestion:- Enter From Date if you have not entered. If only To Date set,
-                              it have higher chances of conflicts."""))
-
-        if user_records.filtered(
-                lambda rec: vals_list['to_date'] >= str(rec.from_date)
-                            or vals_list['to_date'] >= str(rec.to_date)):
-            raise ValidationError(_(
-                """The dates you are setting are conflicting with existing records of
-                 the Salesperson you have set. Enter the set of dates for which commission
-                 records won't get duplicated.
-                 Suggestion:- Enter From Date if you have not entered. If only To Date set,
-                              it have higher chances of conflicts."""))
-
         vals_list['name'] = self.env['ir.sequence'].next_by_code('sale.commission.sequence')
         return super(SalesCommission, self).create(vals_list)
 
     # Compute method to compute total commission.
     def _compute_total_commission(self):
         """
+        --------------------------
+        -COMPUTE TOTAL COMMISSION-
+        --------------------------
         This method will compute sum of all commission lines attached to the
         commission master.
 
@@ -119,31 +120,35 @@ class SalesCommission(models.Model):
         That commission will be added to his individual commissions.
         :return:
         """
-        for record in self:
-            sales_team = self.env['crm.team'].search([('user_id', '=', self.user_id.id)])
-            if sales_team and self.manager_commission_calculation == 'Team Sales':
-                team_commission_percentage = float(
-                    self.env['ir.config_parameter'].sudo().get_param(
-                        'sales_commission_ept.sales_team_commission_percentage'))
+        team_commission_percentage = float(
+            self.env['ir.config_parameter'].sudo().get_param(
+                'sales_commission_ept.sales_team_commission_percentage'))
 
+        for record in self:
+            sales_team = self.env['crm.team'].search([('user_id', '=', record.user_id.id)])
+            if sales_team and record.manager_commission_calculation == 'Team Sales':
                 sale_manager_commission = sum(
-                    map(lambda line: line.amount, self.commission_lines_ids.filtered(
-                        lambda line: line.user_id == self.user_id)))
+                    map(lambda line: line.amount, record.commission_lines_ids.filtered(
+                        lambda line: line.user_id == record.user_id)))
 
                 extra_commission = sum(map(
-                    lambda line: line.amount, self.commission_lines_ids.filtered(
-                        lambda line: line.user_id != self.user_id
+                    lambda line: line.amount, record.commission_lines_ids.filtered(
+                        lambda line: line.user_id != record.user_id
                     ))) * team_commission_percentage
+
                 record.total_commission = sale_manager_commission + extra_commission
 
             else:
                 record.total_commission = sum(map(
-                    lambda line: line.amount, self.commission_lines_ids.filtered(
-                        lambda line: line.user_id == self.user_id
+                    lambda line: line.amount, record.commission_lines_ids.filtered(
+                        lambda line: line.user_id == record.user_id
                     )))
 
     def set_to_draft(self):
         """
+        ---------------------
+        -BUTTON SET TO DRAFT-
+        ---------------------
         This method is executed when 'Set To Draft' button is clicked. This will open
         the form view of wizard which will ask for reason why we want to change state.
 
@@ -158,28 +163,27 @@ class SalesCommission(models.Model):
             'view_id': self.env.ref('sales_commission_ept.wizard_sales_commission_form').id
         }
 
-    def _get_paid_invoiced_commission_lines(self, commission_percentage, members, from_date):
+    def _get_paid_invoiced_commission_lines(self, commission_percentage, members):
         """
         This method will search paid invoices and will calculate commissions amount
         based on commission percentage. It will return array of commission lines.
 
         :param commission_percentage: -> float value of percentage of commission.
 
-        :param members: -> list of all member's ids in sales_team of salesperson if he is sales manager.
-                            if he is not sales manager than list will be empty.
+        :param members: -> list of all member's ids in sales_team of salesperson
+         if he is sales manager.if he is not sales manager than list will be empty.
 
-        :param from_date: -> from_date is self.from_date. If self.from_date is not set than
-                                from_date will have 100 years old static date and
-                                based on that date constraint will be handled.
-
-        :return: commission_lines: ->  array of commission_lines which will be set as one2many on commission master.
+        :return: commission_lines: ->  array of commission_lines which will be set as
+                                        one2many on commission master.
         """
         invoices = self.env['account.move'].search(
-            [('invoice_date', '<=', self.to_date), ('invoice_date', '>=', from_date)]).filtered(
-            lambda
-                inv: inv.user_id.id in members or inv.user_id == self.user_id and
-                     self.product_id in inv.invoice_line_ids.mapped('product_id'))
-        invoice_lines = invoices.invoice_line_ids.filtered(lambda line: line.product_id == self.product_id)
+            [('invoice_date', '<=', self.to_date),
+             ('invoice_date', '>=', self.from_date)]).filtered(
+                 lambda
+                     inv: inv.user_id.id in members or inv.user_id == self.user_id and
+                 self.product_id in inv.invoice_line_ids.mapped('product_id'))
+        invoice_lines = invoices.invoice_line_ids.filtered(
+            lambda line: line.product_id == self.product_id)
         commission_lines = list(map(lambda line: (0, 0, {
             'commission_id': self.id,
             'user_id': line.move_id.user_id.id,
@@ -189,26 +193,24 @@ class SalesCommission(models.Model):
             'source_document': line.move_id.name}), invoice_lines))
         return commission_lines
 
-    def _get_invoiced_commission_lines(self, commission_percentage, members, from_date):
+    def _get_invoiced_commission_lines(self, commission_percentage, members):
         """
         This method will search confirmed invoices and will calculate commissions amount
         based on commission percentage. It will return array of commission lines.
 
         :param commission_percentage: -> float value of percentage of commission.
 
-        :param members: -> list of all member's ids in sales_team of salesperson if he is sales manager.
-                            if he is not sales manager than list will be empty.
+        :param members: -> list of all member's ids in sales_team of salesperson if he is
+                        sales manager. if he is not sales manager than list will be empty.
 
-        :param from_date: -> from_date is self.from_date. If self.from_date is not set than
-                                from_date will have 100 years old static date and
-                                based on that date constraint will be handled.
-
-        :return: commission_lines: ->  array of commission_lines which will be set as one2many on commission master.
+        :return: commission_lines: ->  array of commission_lines which will be set as one2many
+                                        on commission master.
         """
         invoices = self.env['account.move'].search(
-            [('invoice_date', '<=', self.to_date), ('invoice_date', '>=', from_date)]).filtered(
-            lambda inv: inv.user_id.id in members or inv.user_id == self.user_id and
-                        self.product_id in inv.invoice_line_ids.mapped('product_id'))
+            [('invoice_date', '<=', self.to_date),
+             ('invoice_date', '>=', self.from_date)]).filtered(
+                 lambda inv: inv.user_id.id in members or inv.user_id == self.user_id and
+                 self.product_id in inv.invoice_line_ids.mapped('product_id'))
 
         invoice_lines = invoices.invoice_line_ids.filtered(
             lambda line: line.product_id == self.product_id)
@@ -223,7 +225,7 @@ class SalesCommission(models.Model):
 
         return commission_lines
 
-    def _get_sale_commission_lines(self, commission_percentage, members, from_date):
+    def _get_sale_commission_lines(self, commission_percentage, members):
         """
         This method will search confirmed sale orders and will calculate commissions amount
         based on commission percentage. It will return array of commission lines.
@@ -234,19 +236,15 @@ class SalesCommission(models.Model):
                             if he is sales manager. If he is not sales manager
                              than list will be empty.
 
-        :param from_date: -> from_date is self.from_date. If self.from_date is not set than
-                                from_date will have 100 years old static date and
-                                based on that date constraint will be handled.
-
         :return: commission_lines: ->  array of commission_lines which will be set
                                         as one2many on commission master.
         """
         sales = self.env['sale.order'].search(
             [('sale_order_date', '<=', self.to_date),
-             ('sale_order_date', '>=', from_date)]).filtered(
-            lambda s:
-            s.user_id.id in members or s.user_id == self.user_id and
-            self.product_id in s.order_line.mapped('product_id'))
+             ('sale_order_date', '>=', self.from_date)]).filtered(
+                 lambda s:
+                 s.user_id.id in members or s.user_id == self.user_id and
+                 self.product_id in s.order_line.mapped('product_id'))
 
         sale_order_lines = sales.order_line.filtered(
             lambda line: line.product_id == self.product_id)
@@ -272,16 +270,10 @@ class SalesCommission(models.Model):
         Than here it is checked on what commissions will be calculated, for that
         we have field 'salesperson_commission_calculation' which will have mode of commission.
 
-        On that mode different methods are called. from_date field is set if from_date field on
-        commission master is set. Else it will be set to 100 years old static value
-        for computation of records on which from_date is not configured.
+        On that mode different methods are called.
 
         :return: commission_lines :-> one2many field which will be set to commission master.
         """
-        from_date = self.from_date
-        if not self.from_date:
-            from_date = '1900-01-01'
-
         members = []
         commission = float(self.env['ir.config_parameter'].sudo().get_param(
             'sales_commission_ept.commission_percentage'))
@@ -291,18 +283,21 @@ class SalesCommission(models.Model):
             members = sales_team.member_ids.ids
 
         if self.salesperson_commission_calculation == 'Confirm Sales Order':
-            commission_lines = self._get_sale_commission_lines(commission, members, from_date)
+            commission_lines = self._get_sale_commission_lines(commission, members)
 
         elif self.salesperson_commission_calculation == 'Confirm Invoice':
-            commission_lines = self._get_invoiced_commission_lines(commission, members, from_date)
+            commission_lines = self._get_invoiced_commission_lines(commission, members)
 
         else:
-            commission_lines = self._get_paid_invoiced_commission_lines(commission, members, from_date)
+            commission_lines = self._get_paid_invoiced_commission_lines(commission, members)
 
         return commission_lines
 
     def calculate_commission(self):
         """
+        ----------------------
+        -CALCULATE COMMISSION-
+        ----------------------
         This method will fetch all commission lines from database.
         :return:
         """
@@ -315,6 +310,9 @@ class SalesCommission(models.Model):
 
     def _set_status_to_paid(self):
         """
+        ------------------
+        -SCHEDULED ACTION-
+        ------------------
         Scheduled action will call this method one time per day.
         If commission master's all commission lines are paid so that
         commission master will be paid, Than it will write current
@@ -322,8 +320,9 @@ class SalesCommission(models.Model):
 
         :return:
         """
-        if self.status == 'Paid':
-            self.paid_date = date.today()
+        for commission in self:
+            if commission.status == 'Paid':
+                commission.paid_date = date.today()
 
     @api.onchange('commission_lines_ids')
     def set_status(self):
@@ -345,6 +344,9 @@ class SalesCommission(models.Model):
 
     def paid_commission(self):
         """
+        ------------------------
+        -BUTTON PAID COMMISSION-
+        ------------------------
         This method will set all commission lines paid_amount checkbox to True
         and commission masters's state will be changed to 'Paid'.
 

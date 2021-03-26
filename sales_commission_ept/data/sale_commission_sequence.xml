@@ -5,7 +5,7 @@
         <field name="code">sale.commission.sequence</field>
         <field name="prefix">COMM/</field>
         <field name="padding">5</field>
-        <field name="suffix">/GET</field>
+        <field name="suffix">/20%(y)s</field>
         <field name="number_increment">1</field>
     </record>
 </odoo>
