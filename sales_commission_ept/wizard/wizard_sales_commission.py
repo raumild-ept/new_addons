@@ -1,4 +1,4 @@
-from odoo import fields, models, api
+from odoo import fields, models
 
 
 class ModelName(models.TransientModel):
@@ -22,9 +22,7 @@ class ModelName(models.TransientModel):
 
         :return:
         """
-        master = self.env['sales.commission.ept'].browse(self.env.context.get('active_id'))
-        master.message_post(body=self.reason, message_type='comment')
-        master.status = master.commission_lines_ids.status = 'Draft'
-        master.commission_lines_ids.paid_amount = False
-
-
+        commission_id = self.env['sales.commission.ept'].browse(self.env.context.get('active_id'))
+        commission_id.message_post(body=self.reason, message_type='comment')
+        commission_id.status = commission_id.commission_lines_ids.status = 'Draft'
+        commission_id.commission_lines_ids.paid_amount = False

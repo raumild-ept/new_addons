@@ -20,8 +20,10 @@
                                 <strong class="o_kanban_record_title oe_partner_heading">
                                     <h2><field name="name"/></h2>
                                     <br/>
-                                    <strong>From: </strong>
-                                    <field name="from_date"/>
+                                    <t t-if="record.from_date.value">
+                                        <strong>From: </strong>
+                                        <field name="from_date"/>
+                                    </t>
                                     <br/>
                                     <strong>To: </strong>
                                     <field name="to_date"/>
@@ -32,8 +34,10 @@
                                     <strong>Salesperson: </strong>
                                     <field name="user_id"/>
                                     <br/>
-                                    <strong>Total Commission: </strong>
-                                    <field name="total_commission"/>
+                                    <t t-if="record.total_commission != 0">
+                                        <strong>Total Commission: </strong>
+                                        <field name="total_commission"/>
+                                    </t>
                                 </strong>
                             </div>
                         </div>
@@ -55,7 +59,7 @@
                     <button name="calculate_commission" string="Calculate Commissions" type="object"/>
                     <button name="paid_commission" string="Paid Commissions"
                             type="object" attrs="{'invisible':[('status','=','Paid')]}"/>
-                    <field name="status" widget="statusbar" options="{'clickable': '1'}"/>
+                    <field name="status" widget="statusbar"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

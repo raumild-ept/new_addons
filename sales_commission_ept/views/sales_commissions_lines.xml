@@ -21,7 +21,7 @@
         <field name="arch" type="xml">
             <tree string="Sales Commission" editable="bottom" decoration-success="status == 'Paid'">
                 <field name="commission_date"/>
-                <field name="partner_id"/>
+                <field name="partner_id" widget="many2many_tags_avatar"/>
                 <field name="user_id"/>
                 <field name="source_document"/>
                 <field name="amount"/>

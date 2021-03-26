@@ -40,4 +40,23 @@
         <field name="model_id" ref="model_sales_commission_ept"/>
         <field name="groups" eval="[(4,ref('group_sales_commission_ept_commission_manager'))]"/>
     </record>
+
+    <record model="ir.rule" id="ir_rule_for_sales_commission_lines_user">
+        <field name="name">rule.commission.line.user</field>
+        <field name="model_id" ref="model_sales_commission_line"/>
+        <field name="groups" eval="[(4,ref('group_sales_commission_ept_commission_user'))]"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+    </record>
+
+    <record model="ir.rule" id="ir_rule_for_sales_commission_lines_sales_manager">
+        <field name="name">rule.sales.line.manager</field>
+        <field name="model_id" ref="model_sales_commission_line"/>
+        <field name="groups" eval="[(4,ref('group_sales_commission_ept_sales_manager'))]"/>
+    </record>
+
+    <record model="ir.rule" id="ir_rule_sales_commission_lines_manager">
+        <field name="name">rule.commission.line.manager</field>
+        <field name="model_id" ref="model_sales_commission_line"/>
+        <field name="groups" eval="[(4,ref('group_sales_commission_ept_commission_manager'))]"/>
+    </record>
 </odoo>

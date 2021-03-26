@@ -15,23 +15,23 @@ class ResConfigSettingsExtended(models.TransientModel):
                    ],
         help='Commission counting method for commission users.',
         default_model='sales.commission.ept',
-        string='Commission Calculation')
+        string='Salesperson Commission Calculation Mode')
 
     default_manager_commission_calculation = fields.Selection(
         selection=[('Individual sales', 'Individual sales'),
                    ('Team Sales', 'Team Sales')],
-        string='Manager Commission Calculation',
+        string='Manager Commission Calculation Mode',
         help='Commission counting method for commission managers.',
         default_model='sales.commission.ept')
 
     commission_percentage = fields.Float(
-        string='Commission Percentage',
+        string='Commission Percentage Of Salesperson',
         digits=(2, 2),
         help='Default commission percentage.',
         config_parameter='sales_commission_ept.commission_percentage')
 
     team_commission_percentage = fields.Float(
-        string='Team Commission Percentage', digits=(2, 2),
+        string='Commission Percentage of Team Sales', digits=(2, 2),
         config_parameter='sales_commission_ept.sales_team_commission_percentage',
         help="Commission percentage on sales team's total amount.")
 
